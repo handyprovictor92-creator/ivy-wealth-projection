@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ivy's Future Wealth Projection</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .custom-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #10B981;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+            transition: transform 0.1s ease;
+        }
+        .custom-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-full flex flex-col selection:bg-emerald-500 selection:text-white">
+
+    <!-- Header Navbar -->
+    <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                    <i class="fa-solid fa-seedling text-slate-950 text-xl font-bold"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg text-white leading-tight">Ivy's Future Wealth</h1>
+                    <p class="text-xs text-slate-400">Philippine Investment & Savings Simulator</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button onclick="resetDefaults()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium px-3 py-2 rounded-lg transition border border-slate-700">
+                    <i class="fa-solid fa-rotate-right mr-1.5"></i> Reset Defaults
+                </button>
+                <button onclick="openExportModal()" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-3.5 py-2 rounded-lg transition shadow-sm shadow-emerald-600/30">
+                    <i class="fa-solid fa-file-arrow-down mr-1.5"></i> Export Plan
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Top Banner / Notice regarding upcoming income increase -->
+        <div class="mb-8 bg-gradient-to-r from-emerald-950/70 via-slate-900 to-teal-950/70 border border-emerald-500/30 rounded-2xl p-5 shadow-xl relative overflow-hidden">
+            <div class="absolute right-0 top-0 translate-x-6 -translate-y-6 w-48 h-48 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div class="flex items-start space-x-4">
+                    <div class="p-3 bg-emerald-500/20 text-emerald-400 rounded-xl mt-0.5 md:mt-0">
+                        <i class="fa-solid fa-bullseye text-2xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-white">Welcome, Ivy! Let's build your financial freedom.</h2>
+                        <p class="text-sm text-slate-300 mt-1">
+                            Simulate your compounding wealth from your current ₱10,000/mo income, with quick adjustment for your upcoming raise to <span class="text-emerald-400 font-semibold">₱15,000/mo</span>.
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center bg-slate-900/90 border border-slate-700/80 rounded-xl p-2 px-4 shadow-inner">
+                    <span class="text-xs text-slate-400 mr-3">Quick Income Boost:</span>
+                    <button onclick="applyIncomeJump(10000)" id="btn-10k" class="text-xs px-3 py-1.5 rounded-lg font-medium transition bg-emerald-600 text-white shadow-sm">₱10k / mo</button>
+                    <button onclick="applyIncomeJump(15000)" id="btn-15k" class="text-xs px-3 py-1.5 rounded-lg font-medium transition text-slate-300 hover:text-white ml-1">₱15k / mo</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Left Column: Controls & Sliders (5 Cols) -->
+            <div class="lg:col-span-5 space-y-6">
+                <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                        <h3 class="font-bold text-base text-white flex items-center">
+                            <i class="fa-solid fa-sliders text-emerald-400 mr-2.5"></i> Simulation Parameters
+                        </h3>
+                        <span class="text-xs bg-slate-900 text-emerald-400 font-medium px-2.5 py-1 rounded-full border border-emerald-500/20">Customizable</span>
+                    </div>
+
+                    <!-- Starting Monthly Income -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <label class="text-sm font-medium text-slate-300">Starting Monthly Income</label>
+                            <span id="val-income" class="text-emerald-400 font-bold text-base">₱10,000</span>
+                        </div>
+                        <input type="range" id="input-income" min="5000" max="50000" step="1000" value="10000" oninput="updateSimulation()" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer custom-slider">
+                        <div class="flex justify-between text-[11px] text-slate-500">
+                            <span>₱5,000</span>
+                            <span>₱25,000</span>
+                            <span>₱50,000</span>
+                        </div>
+                    </div>
+
+                    <!-- Monthly Savings Rate -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <label class="text-sm font-medium text-slate-300">Monthly Savings Rate</label>
+                            <div class="flex items-center space-x-1">
+                                <span id="val-savings-rate" class="text-emerald-400 font-bold text-base">20</span>
+                                <span class="text-slate-400 text-sm">%</span>
+                            </div>
+                        </div>
+                        <input type="range" id="input-savings-rate" min="5" max="80" step="1" value="20" oninput="updateSimulation()" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer custom-slider">
+                        <div class="flex justify-between text-xs text-slate-400 pt-1 bg-slate-900/60 p-2 rounded-lg border border-slate-800/60">
+                            <span>Saved Monthly:</span>
+                            <span id="val-monthly-amount" class="font-semibold text-white">₱2,000</span>
+                        </div>
+                    </div>
+
+                    <!-- Expected Annual Return -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <label class="text-sm font-medium text-slate-300 flex items-center">
+                                Expected Annual Return
+                                <span class="group relative ml-1.5 cursor-pointer text-slate-500 hover:text-slate-300">
+                                    <i class="fa-solid fa-circle-info text-xs"></i>
+                                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-48 p-2 bg-slate-900 text-slate-300 text-[11px] rounded shadow-lg border border-slate-700 z-25 text-center">
+                                        PH benchmark: Pag-IBIG MP2 (~6-7%), Index Funds (~8-10%)
+                                    </div>
+                                </span>
+                            </label>
+                            <div class="flex items-center space-x-1">
+                                <span id="val-return" class="text-emerald-400 font-bold text-base">7.5</span>
+                                <span class="text-slate-400 text-sm">%</span>
+                            </div>
+                        </div>
+                        <input type="range" id="input-return" min="2.0" max="15.0" step="0.5" value="7.5" oninput="updateSimulation()" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer custom-slider">
+                        <div class="flex items-center justify-between pt-1">
+                            <button onclick="setReturnPreset(6.0)" class="text-[11px] bg-slate-900 hover:bg-slate-800 text-slate-300 px-2 py-1 rounded border border-slate-800">MP2 (~6%)</button>
+                            <button onclick="setReturnPreset(8.0)" class="text-[11px] bg-slate-900 hover:bg-slate-800 text-slate-300 px-2 py-1 rounded border border-slate-800">Balanced (~8%)</button>
+                            <button onclick="setReturnPreset(10.0)" class="text-[11px] bg-slate-900 hover:bg-slate-800 text-slate-300 px-2 py-1 rounded border border-slate-800">Equity/UITF (~10%)</button>
+                        </div>
+                    </div>
+
+                    <!-- Time Horizon -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <label class="text-sm font-medium text-slate-300">Time Horizon</label>
+                            <div class="flex items-center space-x-1">
+                                <span id="val-years" class="text-emerald-400 font-bold text-base">20</span>
+                                <span class="text-slate-400 text-sm">Years</span>
+                            </div>
+                        </div>
+                        <input type="range" id="input-years" min="1" max="30" step="1" value="20" oninput="updateSimulation()" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer custom-slider">
+                        <div class="flex justify-between text-xs text-slate-400 pt-1">
+                            <button onclick="setYearPreset(10)" class="hover:text-emerald-400 underline">10 Yrs</button>
+                            <button onclick="setYearPreset(20)" class="hover:text-emerald-400 underline font-semibold text-emerald-400">20 Yrs</button>
+                            <button onclick="setYearPreset(30)" class="hover:text-emerald-400 underline">30 Yrs</button>
+                        </div>
+                    </div>
+
+                    <!-- Annual Income Growth Rate -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <label class="text-sm font-medium text-slate-300">Annual Salary Raise (%)</label>
+                            <div class="flex items-center space-x-1">
+                                <span id="val-raise" class="text-emerald-400 font-bold text-base">5.0</span>
+                                <span class="text-slate-400 text-sm">%</span>
+                            </div>
+                        </div>
+                        <input type="range" id="input-raise" min="0" max="15" step="0.5" value="5.0" oninput="updateSimulation()" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer custom-slider">
+                        <p class="text-[11px] text-slate-500">Accounts for career promotions & annual salary adjustments over time.</p>
+                    </div>
+
+                </div>
+
+                <!-- Quick PH Financial Tips Card -->
+                <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+                    <h4 class="font-bold text-sm text-white flex items-center">
+                        <i class="fa-solid fa-lightbulb text-amber-400 mr-2"></i> PH Investment Vehicles
+                    </h4>
+                    <div class="space-y-3 text-xs text-slate-300">
+                        <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+                            <span class="font-semibold text-emerald-400 block mb-1">Pag-IBIG MP2 Savings</span>
+                            Tax-exempt, government-backed voluntary savings program with historical dividends higher than regular savings accounts. Perfect for low-risk compounding.
+                        </div>
+                        <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+                            <span class="font-semibold text-teal-400 block mb-1">UITFs & Equity Mutual Funds</span>
+                            Offered by major Philippine banks (BPI, BDO, Metrobank) to track Philippine stock market indices (PSEi) for long-term growth (10+ years).
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Results, Charts & Milestone Cards (7 Cols) -->
+            <div class="lg:col-span-7 space-y-6">
+                
+                <!-- Milestone Summary Cards Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    
+                    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col justify-between">
+                        <span class="text-xs font-medium text-slate-400 flex items-center">
+                            <i class="fa-solid fa-wallet text-emerald-400 mr-1.5"></i> Final Balance
+                        </span>
+                        <div class="mt-3">
+                            <h3 id="stat-final-wealth" class="text-lg sm:text-xl font-bold text-white tracking-tight">₱0</h3>
+                            <span id="stat-horizon-label" class="text-[10px] text-slate-500">At Year 20</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col justify-between">
+                        <span class="text-xs font-medium text-slate-400 flex items-center">
+                            <i class="fa-solid fa-piggy-bank text-blue-400 mr-1.5"></i> Total Saved
+                        </span>
+                        <div class="mt-3">
+                            <h3 id="stat-total-principal" class="text-lg sm:text-xl font-bold text-white tracking-tight">₱0</h3>
+                            <span class="text-[10px] text-slate-500">Principal Contributions</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col justify-between">
+                        <span class="text-xs font-medium text-slate-400 flex items-center">
+                            <i class="fa-solid fa-chart-line text-amber-400 mr-1.5"></i> Interest Earned
+                        </span>
+                        <div class="mt-3">
+                            <h3 id="stat-total-interest" class="text-lg sm:text-xl font-bold text-emerald-400 tracking-tight">₱0</h3>
+                            <span class="text-[10px] text-slate-500">Compound Returns</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col justify-between">
+                        <span class="text-xs font-medium text-slate-400 flex items-center">
+                            <i class="fa-solid fa-bolt text-purple-400 mr-1.5"></i> Wealth Multiplier
+                        </span>
+                        <div class="mt-3">
+                            <h3 id="stat-multiplier" class="text-lg sm:text-xl font-bold text-purple-300 tracking-tight">0.0x</h3>
+                            <span class="text-[10px] text-slate-500">Growth Multiple</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Wealth Growth Chart Card -->
+                <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-2 border-b border-slate-800 gap-2">
+                        <div>
+                            <h3 class="font-bold text-base text-white">Wealth Growth Trajectory</h3>
+                            <p class="text-xs text-slate-400">Comparing total principal saved vs. compound interest earned over time</p>
+                        </div>
+                        <div class="flex items-center space-x-3 text-xs">
+                            <span class="flex items-center text-slate-300"><span class="w-3 h-3 bg-emerald-500 rounded-full inline-block mr-1.5"></span> Portfolio Value</span>
+                            <span class="flex items-center text-slate-300"><span class="w-3 h-3 bg-blue-500 rounded-full inline-block mr-1.5"></span> Principal Saved</span>
+                        </div>
+                    </div>
+                    
+                    <div class="relative h-72 w-full">
+                        <canvas id="wealthChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Milestone Milestones Comparison Bar / Highlights -->
+                <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+                    <h3 class="font-bold text-sm text-white flex items-center">
+                        <i class="fa-solid fa-flag-checkered text-emerald-400 mr-2"></i> Key Milestone Snapshots
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="milestone-cards-container">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Detailed Yearly / Milestone Breakdown Table -->
+        <div class="mt-8 bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                <div>
+                    <h3 class="font-bold text-base text-white flex items-center">
+                        <i class="fa-solid fa-table-list text-emerald-400 mr-2.5"></i> Year-by-Year Wealth Progression Table
+                    </h3>
+                    <p class="text-xs text-slate-400">Detailed breakdown of Ivy's income growth, annual savings, and accumulated compound interest.</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="exportTableToCSV()" class="text-xs bg-slate-900 hover:bg-slate-800 text-slate-300 px-3 py-2 rounded-lg border border-slate-700 transition">
+                        <i class="fa-solid fa-download mr-1.5"></i> Export CSV
+                    </button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto rounded-xl border border-slate-800">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-slate-900 text-slate-400 border-b border-slate-800 font-semibold">
+                            <th class="p-3.5">Year</th>
+                            <th class="p-3.5">Monthly Income</th>
+                            <th class="p-3.5">Annual Savings</th>
+                            <th class="p-3.5">Total Contributions</th>
+                            <th class="p-3.5">Interest Earned</th>
+                            <th class="p-3.5 text-right">End Portfolio Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="breakdown-table-body" class="divide-y divide-slate-800/60 text-slate-300">
+                        <!-- Populated via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 bg-slate-950 mt-16 py-6 text-center text-xs text-slate-500">
+        <p>Ivy's Future Wealth Projection Dashboard • Designed for Philippine Pesos (PHP) Financial Planning</p>
+        <p class="mt-1">Projections are estimates for educational and illustrative purposes using compound interest formulas.</p>
+    </footer>
+
+    <!-- Export Modal -->
+    <div id="export-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-white text-base">Plan Exported Successfully!</h3>
+                <button onclick="closeExportModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <p class="text-xs text-slate-300">
+                Your customized wealth accumulation plan for Ivy has been formatted. You can copy the summary below or export the table to CSV.
+            </p>
+            <div id="export-summary-box" class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs text-slate-300 font-mono space-y-1">
+                <!-- Summary text inserted dynamically -->
+            </div>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button onclick="copyExportText()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-4 py-2 rounded-lg transition">
+                    <i class="fa-solid fa-copy mr-1.5"></i> Copy Summary
+                </button>
+                <button onclick="closeExportModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-4 py-2 rounded-lg transition">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        let wealthChartInstance = null;
+        let lastSimulationData = null;
+
+        // Format currency to PHP
+        function formatPHP(amount) {
+            return '₱' + Math.round(amount).toLocaleString('en-PH');
+        }
+
+        function formatPHPCurrencyPrecise(amount) {
+            return '₱' + Number(amount).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        // Preset button handlers
+        function applyIncomeJump(amount) {
+            document.getElementById('input-income').value = amount;
+            if (amount === 15000) {
+                document.getElementById('btn-15k').className = "text-xs px-3 py-1.5 rounded-lg font-medium transition bg-emerald-600 text-white shadow-sm";
+                document.getElementById('btn-10k').className = "text-xs px-3 py-1.5 rounded-lg font-medium transition text-slate-300 hover:text-white ml-1";
+            } else {
+                document.getElementById('btn-10k').className = "text-xs px-3 py-1.5 rounded-lg font-medium transition bg-emerald-600 text-white shadow-sm";
+                document.getElementById('btn-15k').className = "text-xs px-3 py-1.5 rounded-lg font-medium transition text-slate-300 hover:text-white ml-1";
+            }
+            updateSimulation();
+        }
+
+        function setReturnPreset(val) {
+            document.getElementById('input-return').value = val;
+            updateSimulation();
+        }
+
+        function setYearPreset(yrs) {
+            document.getElementById('input-years').value = yrs;
+            updateSimulation();
+        }
+
+        // Main Simulation Engine
+        function updateSimulation() {
+            const startMonthlyIncome = parseFloat(document.getElementById('input-income').value);
+            const savingsRate = parseFloat(document.getElementById('input-savings-rate').value) / 100;
+            const annualReturn = parseFloat(document.getElementById('input-return').value) / 100;
+            const totalYears = parseInt(document.getElementById('input-years').value);
+            const annualRaise = parseFloat(document.getElementById('input-raise').value) / 100;
+
+            // Update UI slider texts
+            document.getElementById('val-income').innerText = formatPHP(startMonthlyIncome);
+            document.getElementById('val-savings-rate').innerText = (savingsRate * 100).toFixed(0);
+            document.getElementById('val-monthly-amount').innerText = formatPHP(startMonthlyIncome * savingsRate);
+            document.getElementById('val-return').innerText = (annualReturn * 100).toFixed(1);
+            document.getElementById('val-years').innerText = totalYears;
+            document.getElementById('val-raise').innerText = (annualRaise * 100).toFixed(1);
+            document.getElementById('stat-horizon-label').innerText = `At Year ${totalYears}`;
+
+            let currentMonthlyIncome = startMonthlyIncome;
+            let currentPortfolio = 0;
+            let totalPrincipalContributed = 0;
+
+            const yearlyData = [];
+            const chartLabels = ['Year 0'];
+            const chartPortfolio = [0];
+            const chartPrincipal = [0];
+
+            for (let year = 1; year <= totalYears; year++) {
+                const annualIncome = currentMonthlyIncome * 12;
+                const annualSavings = annualIncome * savingsRate;
+                const monthlySavings = annualSavings / 12;
+
+                // Compound interest calculation monthly
+                let yearStartPortfolio = currentPortfolio;
+                let yearInterestEarned = 0;
+
+                for (let m = 1; m <= 12; m++) {
+                    const monthlyReturn = annualReturn / 12;
+                    currentPortfolio = (currentPortfolio + monthlySavings) * (1 + monthlyReturn);
+                    yearInterestEarned += (currentPortfolio - (yearStartPortfolio + monthlySavings * m)); // approximate tracking
+                }
+
+                totalPrincipalContributed += annualSavings;
+                // Precise interest calculation
+                let exactInterest = currentPortfolio - totalPrincipalContributed;
+                if (exactInterest < 0) exactInterest = 0;
+
+                yearlyData.push({
+                    year: year,
+                    monthlyIncome: currentMonthlyIncome,
+                    annualSavings: annualSavings,
+                    totalPrincipal: totalPrincipalContributed,
+                    interestEarned: exactInterest,
+                    endBalance: currentPortfolio
+                });
+
+                chartLabels.push(`Year ${year}`);
+                chartPortfolio.push(Math.round(currentPortfolio));
+                chartPrincipal.push(Math.round(totalPrincipalContributed));
+
+                // Apply annual salary raise for next year
+                currentMonthlyIncome *= (1 + annualRaise);
+            }
+
+            const finalRecord = yearlyData[yearlyData.length - 1];
+            const finalWealth = finalRecord.endBalance;
+            const finalPrincipal = finalRecord.totalPrincipal;
+            const finalInterest = finalRecord.interestEarned;
+            const multiplier = finalPrincipal > 0 ? (finalWealth / finalPrincipal).toFixed(2) : 0;
+
+            // Update Milestone Summary Cards
+            document.getElementById('stat-final-wealth').innerText = formatPHP(finalWealth);
+            document.getElementById('stat-total-principal').innerText = formatPHP(finalPrincipal);
+            document.getElementById('stat-total-interest').innerText = formatPHP(finalInterest);
+            document.getElementById('stat-multiplier').innerText = `${multiplier}x`;
+
+            // Render Milestone Snapshot Cards (e.g. Year 5, 10, 20 or max)
+            renderMilestoneCards(yearlyData, totalYears);
+
+            // Render Table Breakdown
+            renderTable(yearlyData);
+
+            // Store data for export
+            lastSimulationData = {
+                startMonthlyIncome,
+                savingsRate: savingsRate * 100,
+                annualReturn: annualReturn * 100,
+                totalYears,
+                finalWealth,
+                finalPrincipal,
+                finalInterest,
+                multiplier,
+                yearlyData
+            };
+
+            // Update Chart
+            updateChart(chartLabels, chartPortfolio, chartPrincipal);
+        }
+
+        // Render milestone summary highlights
+        function renderMilestoneCards(yearlyData, totalYears) {
+            const container = document.getElementById('milestone-cards-container');
+            container.innerHTML = '';
+
+            const milestones = [5, 10, 20, 30].filter(y => y <= totalYears);
+            if (milestones.length === 0 || milestones[milestones.length - 1] !== totalYears) {
+                milestones.push(totalYears);
+            }
+            // Take up to 3 key milestones for display
+            const displayMilestones = milestones.slice(-3);
+
+            displayMilestones.forEach(mYear => {
+                const record = yearlyData.find(d => d.year === mYear);
+                if (!record) return;
+
+                const card = document.createElement('div');
+                card.className = "bg-slate-900/90 border border-slate-800 p-4 rounded-xl space-y-2";
+                card.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-emerald-400">Year ${record.year} Milestone</span>
+                        <span class="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-slate-400">Income: ${formatPHP(record.monthlyIncome)}/mo</span>
+                    </div>
+                    <div class="pt-1">
+                        <div class="text-base font-bold text-white">${formatPHP(record.endBalance)}</div>
+                        <div class="text-[11px] text-slate-400 flex justify-between mt-1">
+                            <span>Principal: ${formatPHP(record.totalPrincipal)}</span>
+                            <span class="text-emerald-400 font-medium">+${formatPHP(record.interestEarned)} interest</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Render Table Breakdown
+        function renderTable(yearlyData) {
+            const tbody = document.getElementById('breakdown-table-body');
+            tbody.innerHTML = '';
+
+            yearlyData.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-900/50 transition border-b border-slate-800/40";
+                tr.innerHTML = `
+                    <td class="p-3.5 font-semibold text-white">Year ${row.year}</td>
+                    <td class="p-3.5 text-slate-300">${formatPHP(row.monthlyIncome)}</td>
+                    <td class="p-3.5 text-slate-300">${formatPHP(row.annualSavings)}</td>
+                    <td class="p-3.5 text-blue-400 font-medium">${formatPHP(row.totalPrincipal)}</td>
+                    <td class="p-3.5 text-emerald-400 font-medium">${formatPHP(row.interestEarned)}</td>
+                    <td class="p-3.5 text-right font-bold text-white">${formatPHP(row.endBalance)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Initialize or update Chart.js
+        function updateChart(labels, portfolioData, principalData) {
+            const ctx = document.getElementById('wealthChart').getContext('2d');
+            
+            if (wealthChartInstance) {
+                wealthChartInstance.data.labels = labels;
+                wealthChartInstance.data.datasets[0].data = portfolioData;
+                wealthChartInstance.data.datasets[1].data = principalData;
+                wealthChartInstance.update();
+                return;
+            }
+
+            wealthChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Total Portfolio Balance (PHP)',
+                            data: portfolioData,
+                            borderColor: '#10B981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            fill: true,
+                            tension: 0.3,
+                            borderWidth: 3,
+                            pointRadius: 0,
+                            pointHoverRadius: 6
+                        },
+                        {
+                            label: 'Total Principal Contributed (PHP)',
+                            data: principalData,
+                            borderColor: '#3B82F6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                            fill: true,
+                            tension: 0.3,
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            pointHoverRadius: 5
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += formatPHP(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(51, 65, 85, 0.2)'
+                            },
+                            ticks: {
+                                color: '#94A3B8',
+                                font: { size: 10 },
+                                maxTicksLimit: 10
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(51, 65, 85, 0.2)'
+                            },
+                            ticks: {
+                                color: '#94A3B8',
+                                font: { size: 10 },
+                                callback: function(value) {
+                                    if (value >= 1000000) {
+                                        return '₱' + (value / 1000000).toFixed(1) + 'M';
+                                    } else if (value >= 1000) {
+                                        return '₱' + (value / 1000).toFixed(0) + 'k';
+                                    }
+                                    return '₱' + value;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Reset Defaults
+        function resetDefaults() {
+            document.getElementById('input-income').value = 10000;
+            document.getElementById('input-savings-rate').value = 20;
+            document.getElementById('input-return').value = 7.5;
+            document.getElementById('input-years').value = 20;
+            document.getElementById('input-raise').value = 5.0;
+            applyIncomeJump(10000);
+            updateSimulation();
+        }
+
+        // Export Modal Functions
+        function openExportModal() {
+            if (!lastSimulationData) return;
+            const box = document.getElementById('export-summary-box');
+            box.innerHTML = `
+                <div><strong>Plan:</strong> Ivy's Wealth Projection (${lastSimulationData.totalYears} Years)</div>
+                <div><strong>Starting Income:</strong> ${formatPHP(lastSimulationData.startMonthlyIncome)}/mo</div>
+                <div><strong>Savings Rate:</strong> ${lastSimulationData.savingsRate}%</div>
+                <div><strong>Expected Return:</strong> ${lastSimulationData.annualReturn}% p.a.</div>
+                <div><strong>Final Portfolio:</strong> ${formatPHP(lastSimulationData.finalWealth)}</div>
+                <div><strong>Total Contributions:</strong> ${formatPHP(lastSimulationData.finalPrincipal)}</div>
+                <div><strong>Total Interest Earned:</strong> ${formatPHP(lastSimulationData.finalInterest)}</div>
+            `;
+            document.getElementById('export-modal').classList.remove('hidden');
+        }
+
+        function closeExportModal() {
+            document.getElementById('export-modal').classList.add('hidden');
+        }
+
+        function copyExportText() {
+            if (!lastSimulationData) return;
+            const text = `Ivy's Wealth Projection (${lastSimulationData.totalYears} Years)\n` +
+                         `Starting Income: ${formatPHP(lastSimulationData.startMonthlyIncome)}/mo\n` +
+                         `Savings Rate: ${lastSimulationData.savingsRate}%\n` +
+                         `Expected Return: ${lastSimulationData.annualReturn}%\n` +
+                         `Final Portfolio Value: ${formatPHP(lastSimulationData.finalWealth)}\n` +
+                         `Total Principal Saved: ${formatPHP(lastSimulationData.finalPrincipal)}\n` +
+                         `Total Interest Earned: ${formatPHP(lastSimulationData.finalInterest)}`;
+            
+            const tempInput = document.createElement('textarea');
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            alert("Summary copied to clipboard!");
+        }
+
+        function exportTableToCSV() {
+            if (!lastSimulationData || !lastSimulationData.yearlyData) return;
+            let csv = 'Year,Monthly Income,Annual Savings,Total Principal,Interest Earned,End Balance\n';
+            lastSimulationData.yearlyData.forEach(row => {
+                csv += `${row.year},${row.monthlyIncome},${row.annualSavings},${row.totalPrincipal},${row.interestEarned},${row.endBalance}\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ivys_wealth_projection.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            updateSimulation();
+        };
+    </script>
+</body>
+</html>
